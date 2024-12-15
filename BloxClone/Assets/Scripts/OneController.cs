@@ -1,64 +1,61 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem.Utilities;
 using UnityEngine.UI;
 
 public class OneController : MonoBehaviour
 {
-    public float moveDistance = 1f; // Odległość ruchu na krok
-    public float moveSpeed = 5f;    // Prędkość ruchu
-    public LayerMask obstacleLayer; // Warstwa przeszkód
+    public float moveDistance = 1f;
+    public float moveSpeed = 5f;
+    public LayerMask obstacleLayer;
     public LayerMask spikeLayer;
+    public MySceneManager MySceneManager;
+    public AudioSource audioSource;
+    public AudioSource damageSound;
 
-    private Vector3 targetPosition; // Docelowa pozycja
-    public int moveCount = 0;      // Licznik ruchów
-    public bool isMoving = false;  // Czy obiekt aktualnie się porusza
+    private Vector3 targetPosition;
+    public int moveCount = 0;
+    public bool isMoving = false;
+    public bool isDead = false;
     public int maxMove = 37;
 
     public bool onSpike = false;
     private bool x = false;
     private SpikeScript spikeScript = null;
 
-    public Text moveCounterText;    // Referencja do tekstu licznika (opcjonalne)
-
     void Start()
     {
-        // Inicjalna pozycja celu to aktualna pozycja
         targetPosition = transform.position;
-
-        // Aktualizacja tekstu licznika na UI (jeśli dostępny)
-        UpdateMoveCounter();
     }
 
     void Update()
     {
-        // Sprawdzaj, czy obiekt osiągnął docelową pozycję
-        if (Vector3.Distance(transform.position, targetPosition) < 0.01f)
+        if (Vector3.Distance(transform.position, targetPosition) < 0.01f && isDead == false)
         {
-            isMoving = false; // Ruch zakończony
+            isMoving = false;
 
             Vector3 moveDirection = Vector3.zero;
 
-            // Obsługa wejścia (klawisze kierunkowe)
-            if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow)) // W górę
+            if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
             {
                 moveDirection = new Vector3(0, 0, moveDistance);
             }
-            else if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow)) // W dół
+            else if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
             {
                 moveDirection = new Vector3(0, 0, -moveDistance);
             }
-            else if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow)) // W lewo
+            else if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
             {
                 moveDirection = new Vector3(-moveDistance, 0, 0);
             }
-            else if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow)) // W prawo
+            else if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
             {
                 moveDirection = new Vector3(moveDistance, 0, 0);
             }
 
             if (!IsObstacleInDirection(moveDirection, obstacleLayer) && moveDirection != Vector3.zero)
             {
-                // Ustaw nową docelową pozycję
                 targetPosition += moveDirection;
 
                 x = true;
@@ -70,22 +67,16 @@ public class OneController : MonoBehaviour
                 
                 maxMove--;
                 moveCount++;
-                // Zwiększ licznik ruchów
 
-                // Aktualizuj licznik w UI i konsoli
-                UpdateMoveCounter();
                 Debug.Log("Liczba ruchów: " + maxMove);
 
-                // Oznacz, że obiekt aktualnie się porusza
                 isMoving = true;
                 CheckMaxMoves();
             }
-            // Sprawdź, czy na drodze jest przeszkoda
-            
         }
 
-        // Płynne przechodzenie do docelowej pozycji
         transform.position = Vector3.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);
+
         if (onSpike == true && x)
         {
             CheckSpike();
@@ -93,7 +84,6 @@ public class OneController : MonoBehaviour
         }
     }
 
-    // Funkcja sprawdzająca, czy w danym kierunku jest przeszkoda
     private bool IsObstacleInDirection(Vector3 direction, LayerMask obstacleLayer)
     {
         Vector3 origin = transform.position;
@@ -107,7 +97,6 @@ public class OneController : MonoBehaviour
                 BoulderScript boulder = hit.collider.GetComponent<BoulderScript>();
                 if (boulder != null)
                 {
-                    // Jeśli boulder może się przesunąć, pozwól graczowi go popchnąć
                     boulder.TryMove(direction);
                     maxMove--;
                     moveCount++;
@@ -122,7 +111,6 @@ public class OneController : MonoBehaviour
                 EnemyScript enemy = hit.collider.GetComponent<EnemyScript>();
                 if (enemy != null)
                 {
-                    // Jeśli boulder może się przesunąć, pozwól graczowi go popchnąć
                     enemy.TryMove(direction);
                     maxMove--;
                     moveCount++;
@@ -132,9 +120,9 @@ public class OneController : MonoBehaviour
                     }
                 }
             }
-            return true; // Inny obiekt na drodze
+            return true;
         }
-        return false; // Brak przeszkód
+        return false;
     }
 
     private bool IsSpikeInDirection(Vector3 direction, LayerMask spikeLayer)
@@ -150,28 +138,34 @@ public class OneController : MonoBehaviour
             {
                 SpikeScript spike = hit.collider.GetComponent<SpikeScript>();
             }
-            return true; // Inny obiekt na drodze
+            return true;
         }
-        return false; // Brak przeszkód
-    }
-
-
-
-    // Funkcja aktualizująca tekst licznika (jeśli podano referencję)
-    public void UpdateMoveCounter()
-    {
-        if (moveCounterText != null)
-        {
-            moveCounterText.text = "" + maxMove;
-        }
+        return false;
     }
 
     private void CheckMaxMoves()
     {
         if (maxMove < 0)
         {
-            Debug.Log("Brak ruchów! Obiekt został zniszczony.");
-            Destroy(gameObject); // Zniszcz obiekt gracza
+            audioSource.Play();
+            isDead = true;
+
+            var delay = 0.7f;
+            
+            Invoke(nameof(RestartScene), delay);
+        }
+    }
+
+    private void RestartScene()
+    {
+        MySceneManager mySceneManager = FindObjectOfType<MySceneManager>();
+        if (mySceneManager != null)
+        {
+            mySceneManager.Restart();
+        }
+        else
+        {
+            Debug.LogError("Nie znaleziono MySceneManager w scenie!");
         }
     }
 
@@ -181,6 +175,10 @@ public class OneController : MonoBehaviour
         {
             onSpike = true;
             spikeScript = collider.gameObject.GetComponent<SpikeScript>();
+        }
+        if (collider.CompareTag("Win"))
+        {
+            isDead = true;
         }
     }
 
@@ -197,22 +195,24 @@ public class OneController : MonoBehaviour
     public void CheckSpike()
     {
         Debug.Log($"spikeScript: {spikeScript}");
-        // Sprawdź liczbę ruchów gracza z aktualnego stepMode w SpikeScript
-        if (spikeScript != null) // Upewnij się, że spikeScript nie jest null
+        if (spikeScript != null)
         {
             if (spikeScript.stepMode == SpikeScript.StepMode.Even && moveCount % 2 == 0)
             {
                 Debug.Log("Gracz ma parzystą liczbę ruchów na spike.");
+                damageSound.Play();
                 maxMove--;
             }
             else if (spikeScript.stepMode == SpikeScript.StepMode.Odd && moveCount % 2 != 0)
             {
                 Debug.Log("Gracz ma nieparzystą liczbę ruchów na spike.");
+                damageSound.Play();
                 maxMove--;
             }
             else if (spikeScript.stepMode == SpikeScript.StepMode.Always)
             {
                 Debug.Log("Spike zawsze działa, niezależnie od liczby ruchów.");
+                damageSound.Play();
                 maxMove--;
             }
         }

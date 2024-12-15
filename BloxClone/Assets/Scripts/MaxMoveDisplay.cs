@@ -1,10 +1,12 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-using TMPro; // U¿ywane do obs³ugi TextMeshPro
+using TMPro;
 
 public class MaxMoveDisplay : MonoBehaviour
 {
-    public OneController oneController; // Referencja do komponentu OneController
-    public TMP_Text maxMoveText;        // Referencja do TextMeshPro UI
+    public OneController oneController;
+    public TMP_Text maxMoveText;
 
     void Update()
     {
@@ -12,7 +14,6 @@ public class MaxMoveDisplay : MonoBehaviour
         {
             int maxMove = oneController.maxMove;
 
-            // Wyœwietl "X", jeœli maxMove jest mniejsze od 1, w przeciwnym razie wyœwietl liczbê
             if (maxMove < 1)
             {
                 maxMoveText.text = "X";

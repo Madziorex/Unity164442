@@ -1,14 +1,17 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class DoorScript : MonoBehaviour
 {
-    public bool isLocked = true; // Czy drzwi s¹ zablokowane?
-    public Animator doorAnimator; // Referencja do animatora drzwi (opcjonalne, jeœli drzwi maj¹ animacjê)
-    private Collider doorCollider; // Referencja do collidera drzwi
+    public bool isLocked = true;
+    public Animator doorAnimator;
+    private Collider doorCollider;
+    public AudioSource doorSound;
 
     void Start()
     {
-        doorCollider = GetComponent<Collider>(); // Pobierz collider drzwi
+        doorCollider = GetComponent<Collider>();
         if (doorCollider == null)
         {
             Debug.LogError("Brak Collidera na obiekcie drzwi!");
@@ -22,12 +25,13 @@ public class DoorScript : MonoBehaviour
 
         if (doorCollider != null)
         {
-            doorCollider.enabled = false; // Wy³¹cz collider
+            doorCollider.enabled = false;
+            doorSound.Play();
         }
 
         if (doorAnimator != null)
         {
-            doorAnimator.SetTrigger("Open"); // Otwórz drzwi (animacja opcjonalna)
+            doorAnimator.SetTrigger("Open");
         }
         else
         {

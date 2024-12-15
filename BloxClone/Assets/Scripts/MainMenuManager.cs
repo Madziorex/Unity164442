@@ -7,9 +7,12 @@ public class MainMenuManager : MonoBehaviour
 {
     [SerializeField] public GameObject Menu;
     [SerializeField] public GameObject Chapters;
+    [SerializeField] public GameObject Credits;
+    [SerializeField] public GameObject Settings;
     private bool isChapter = false;
+    private bool isCredits = false;
+    private bool isSettings = false;
 
-    // Update is called once per frame
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -19,6 +22,20 @@ public class MainMenuManager : MonoBehaviour
                 Chapters.SetActive(false);
                 Menu.SetActive(true);
                 isChapter = false;
+            }
+
+            if (isCredits)
+            {
+                Credits.SetActive(false);
+                Menu.SetActive(true);
+                isCredits = false;
+            }
+
+            if (isSettings)
+            {
+                Settings.SetActive(false);
+                Menu.SetActive(true);
+                isSettings = false;
             }
         }
     }
@@ -53,6 +70,20 @@ public class MainMenuManager : MonoBehaviour
         Chapters.SetActive(true);
         Menu.SetActive(false);
         isChapter = true;
+    }
+
+    public void CreditsSelect()
+    {
+        Credits.SetActive(true);
+        Menu.SetActive(false);
+        isCredits = true;
+    }
+
+    public void SettingsSelect()
+    {
+        Settings.SetActive(true);
+        Menu.SetActive(false);
+        isSettings = true;
     }
 
     public void Exit()

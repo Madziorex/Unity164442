@@ -1,30 +1,32 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class BoulderScript : MonoBehaviour
 {
-    public float moveDistance = 1f; // Odleg³oœæ przesuniêcia bouldera
-    public LayerMask obstacleLayer; // Warstwa przeszkód
-    public float speed = 5f; // Prêdkoœæ ruchu bouldera
+    public float moveDistance = 1f;
+    public LayerMask obstacleLayer;
+    public float speed = 5f;
+    public AudioSource Audio;
 
     public bool TryMove(Vector3 direction)
     {
-        // Wylicz now¹ pozycjê w oparciu o aktualn¹ pozycjê i dok³adny kierunek
         Vector3 targetPosition = transform.position + new Vector3(
             Mathf.Round(direction.x) * moveDistance,
             Mathf.Round(direction.y) * moveDistance,
             Mathf.Round(direction.z) * moveDistance
         );
 
-        // SprawdŸ, czy nowa pozycja jest wolna
         if (IsPositionFree(targetPosition))
         {
+            Audio.Play();
             StartCoroutine(MoveToPosition(targetPosition));
-            return true; // Ruch mo¿liwy
+            return true;
         }
         else
         {
             Debug.Log("Boulder nie mo¿e byæ przesuniêty. Pozycja zajêta.");
-            return false; // Ruch niemo¿liwy
+            return false;
         }
     }
 
@@ -34,7 +36,7 @@ public class BoulderScript : MonoBehaviour
 
         Collider[] colliders = Physics.OverlapBox(
             targetPosition,
-            transform.localScale / 2 * 0.9f, // Nieco mniejszy box dla bezpieczeñstwa
+            transform.localScale / 2 * 0.9f,
             Quaternion.identity,
             obstacleLayer
         );
@@ -45,17 +47,17 @@ public class BoulderScript : MonoBehaviour
             {
                 Debug.Log($"Kolizja z: {collider.name}");
             }
-            return false; // Miejsce zajête
+            return false;
         }
 
-        return true; // Brak przeszkód
+        return true;
     }
 
     private System.Collections.IEnumerator MoveToPosition(Vector3 targetPosition)
     {
         Vector3 startPosition = transform.position;
         float elapsedTime = 0f;
-        float moveDuration = moveDistance / speed; // Czas ruchu bazuj¹cy na odleg³oœci i prêdkoœci
+        float moveDuration = moveDistance / speed;
 
         while (elapsedTime < moveDuration)
         {
@@ -64,6 +66,6 @@ public class BoulderScript : MonoBehaviour
             yield return null;
         }
 
-        transform.position = targetPosition; // Ustaw dok³adn¹ pozycjê
+        transform.position = targetPosition;
     }
 }

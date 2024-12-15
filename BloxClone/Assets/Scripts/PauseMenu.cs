@@ -5,13 +5,12 @@ using UnityEngine.SceneManagement;
 
 public class PauseMenu : MonoBehaviour
 {
-    [SerializeField]  public GameObject UI_Menu; // Referencja do menu
+    [SerializeField]  public GameObject UI_Menu;
 
-    private bool isPaused = false; // Czy gra jest wstrzymana?
+    private bool isPaused = false;
 
     void Update()
     {
-        // SprawdŸ, czy naciœniêto ESC
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             if (isPaused)
@@ -25,27 +24,25 @@ public class PauseMenu : MonoBehaviour
         }
     }
 
-    // Funkcja wznawiaj¹ca grê
     public void Resume()
     {
         Debug.Log("Resuming Game");
-        Time.timeScale = 1f;          // Wznów czas gry
+        Time.timeScale = 1f;
         UI_Menu.SetActive(false);
         isPaused = false;
     }
 
     public void Resume2()
     {
-        UI_Menu.SetActive(false); // Ukryj menu
-        Time.timeScale = 1f;          // Wznów czas gry
+        UI_Menu.SetActive(false);
+        Time.timeScale = 1f;
         isPaused = false;
     }
 
-    // Funkcja zatrzymuj¹ca grê
     public void Pause()
     {
-        UI_Menu.SetActive(true); // Poka¿ menu
-        Time.timeScale = 0f;         // Zatrzymaj czas gry
+        UI_Menu.SetActive(true);
+        Time.timeScale = 0f;
         isPaused = true;
     }
 

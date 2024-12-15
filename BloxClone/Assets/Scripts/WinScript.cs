@@ -1,33 +1,31 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class WinScript : MonoBehaviour
 {
     public AudioSource audioSource;
+    [SerializeField] OneController OneController;
 
     private void OnTriggerEnter(Collider other)
     {
-        // SprawdŸ, czy obiekt koliduj¹cy to gracz
-        if (other.CompareTag("Player"))
+        OneController oneController = FindObjectOfType<OneController>();
+        if (other.CompareTag("Player") && oneController.isDead == false)
         {
             audioSource.Play();
             Debug.Log("Gratulacje! Gracz wygra³!");
 
-            // Rozpocznij ³adowanie kolejnej sceny po 5 sekundach
             StartCoroutine(LoadNextSceneAfterDelay());
         }
     }
 
     private IEnumerator LoadNextSceneAfterDelay()
     {
-        // Odczekaj 5 sekund
-        yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(3f);
 
-        // Pobierz nazwê aktualnej sceny
         string currentSceneName = SceneManager.GetActiveScene().name;
 
-        // Decyduj, która scena ma siê za³adowaæ
         switch (currentSceneName)
         {
             case "Level1":
